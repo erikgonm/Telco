@@ -1,0 +1,74 @@
+# ==========================================
+# Ignorar entorno virtual de Python
+# ==========================================
+venv/
+.env/
+
+# ==========================================
+# Ignorar archivos generados por Jupyter
+# ==========================================
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# ==========================================
+# Archivos de configuración del entorno
+# ==========================================
+.vscode/
+__pycache__/
+*.py[cod]
+*.so
+*.dll
+*.pyd
+
+# ==========================================
+# Archivos temporales del sistema
+# ==========================================
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Archivos de datos y salidas
+# ==========================================
+# Excluir solo si no están dentro de las carpetas `data` o `report`
+*.tsv
+*.xlsx
+*.xls
+*.sav
+*.sqlite
+*.db
+*.json
+*.parquet
+*.feather
+*.zip
+*.rar
+*.tar.gz
+
+# Para evitar ignorar los archivos .csv dentro de las carpetas `data` y `report`
+!Data/*.csv
+!Reports/*.csv
+!Notebooks/*.ipynb
+!Code/*.py
+# ==========================================
+# Modelos y outputs
+# ==========================================
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.model
+*.log
+
+# ==========================================
+# Cache de librerías y compilaciones
+# ==========================================
+*.egg-info/
+*.egg
+dist/
+build/
+
+# ==========================================
+# Archivos de control de entorno y kernel
+# ==========================================
+*.ipynb_checkpoints/
+*.bak
+*.swp

@@ -27,3 +27,4 @@ ipykernel
 # Utilidades
 tqdm
 joblib
+kagglehub
