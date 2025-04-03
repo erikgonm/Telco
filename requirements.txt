@@ -1,0 +1,29 @@
+scipy
+keras
+torch
+jupyter
+
+# Núcleo de Python
+pandas
+numpy==2.2.4
+
+# Visualización
+matplotlib
+seaborn
+
+# Machine Learning
+scikit-learn
+xgboost
+lightgbm
+
+# Interpretabilidad
+shap
+
+# Jupyter y notebooks
+jupyterlab
+notebook
+ipykernel
+
+# Utilidades
+tqdm
+joblib
