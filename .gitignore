@@ -45,9 +45,11 @@ Thumbs.db
 
 # Para evitar ignorar los archivos .csv dentro de las carpetas `data` y `report`
 !Data/*.csv
-!Reports/*.csv
 !Notebooks/*.ipynb
-!Code/*.py
+!Reports/*.csv
+!Visuals/*.png
+
+
 # ==========================================
 # Modelos y outputs
 # ==========================================
