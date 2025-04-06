@@ -48,7 +48,7 @@ Thumbs.db
 !Notebooks/*.ipynb
 !Reports/*.csv
 !Visuals/*.png
-
+!Models/*.pkl
 
 # ==========================================
 # Modelos y outputs
