@@ -1,0 +1,5 @@
+Modelo,Accuracy,F1_Churn,AUC_ROC,TP,FN,FP,TN
+Logistic Regression,0.82,0.65,0.8533,168,113,76,698
+Árbol de Decisión,0.73,0.5,0.6601,144,137,151,623
+Random Forest,0.8,0.57,0.8289,142,139,77,697
+XGBoost,0.79,0.57,0.8274,146,135,86,688
