@@ -6,9 +6,12 @@ import shutil
 from PIL import Image
 from io import BytesIO
 import kagglehub
+import pandas as pd
 
-# Constantes de ruta
-NOTEBOOK_PATH = "Notebooks/exploracion_inicial_de_data.ipynb"
+# ────────────────────────────────
+# 📁 Constantes de rutas y archivos
+# ────────────────────────────────
+NOTEBOOK_PATH = "Notebooks/proyecto_final.ipynb"
 CARPETAS_VISUALIZACION = [
     "Visuals/exploracion_inicial",
     "Visuals/preprocesamiento_y_modelado",
@@ -16,8 +19,12 @@ CARPETAS_VISUALIZACION = [
     "Visuals/shap"
 ]
 CONFIG_FOLDER = "Configuracion"
+LOGO_PATH = "Assets/logo.png"
+REPORTS_FOLDER = "Reports"
 
-# Obtener archivo JSON de configuración
+# ────────────────────────────────
+# 🔧 Cargar archivo de configuración
+# ────────────────────────────────
 def obtener_archivo_config():
     for file in os.listdir(CONFIG_FOLDER):
         if file.endswith(".json"):
@@ -26,7 +33,9 @@ def obtener_archivo_config():
 
 CONFIG_PATH = obtener_archivo_config()
 
-# Función para ejecutar el notebook
+# ────────────────────────────────
+# 🚀 Ejecutar Notebook
+# ────────────────────────────────
 def ejecutar_notebook():
     try:
         subprocess.run([
@@ -40,7 +49,9 @@ def ejecutar_notebook():
     except subprocess.CalledProcessError as e:
         sg.popup_error(f"❌ Error al ejecutar el notebook:\n{e}")
 
-# Función para mostrar una imagen
+# ────────────────────────────────
+# 🖼️ Mostrar imagen de la carpeta
+# ────────────────────────────────
 def mostrar_imagen(carpeta, nombre_imagen):
     ruta = os.path.join(carpeta, nombre_imagen)
     if os.path.exists(ruta):
@@ -53,13 +64,25 @@ def mostrar_imagen(carpeta, nombre_imagen):
         sg.popup_error("❌ No se encontró la imagen.")
         return None
 
-# Función para cargar nombres de imágenes desde una carpeta
+# ────────────────────────────────
+# 📁 Cargar nombres de imágenes
+# ────────────────────────────────
 def cargar_nombres_imagenes(carpeta):
     if not os.path.exists(carpeta):
         return []
     return [f for f in os.listdir(carpeta) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
 
-# Panel de configuración
+# ────────────────────────────────
+# 📄 Cargar nombres de reportes
+# ────────────────────────────────
+def cargar_nombres_reportes():
+    if not os.path.exists(REPORTS_FOLDER):
+        return []
+    return [f for f in os.listdir(REPORTS_FOLDER) if f.lower().endswith(".csv")]
+
+# ────────────────────────────────
+# ⚙️ Panel para modificar configuración
+# ────────────────────────────────
 def abrir_panel_configuracion():
     if not CONFIG_PATH:
         sg.popup_error("No se encontró archivo de configuración en 'Configuracion'")
@@ -91,7 +114,9 @@ def abrir_panel_configuracion():
             break
     ventana_config.close()
 
-# Descargar dataset automáticamente y actualizar config
+# ────────────────────────────────
+# ⬇️ Descargar dataset desde Kaggle
+# ────────────────────────────────
 def descargar_dataset():
     path = kagglehub.dataset_download("blastchar/telco-customer-churn")
     downloaded_files = os.listdir(path)
@@ -109,25 +134,93 @@ def descargar_dataset():
     else:
         sg.popup_error("❌ No se encontró el archivo .csv en el dataset descargado")
 
-# Layout principal
+# ────────────────────────────────
+# 🖼️ Redimensionar el logo
+# ────────────────────────────────
+def cargar_logo_redimensionado(tamaño=(100, 100)):
+    with Image.open(LOGO_PATH) as img:
+        img.thumbnail(tamaño)
+        bio = BytesIO()
+        img.save(bio, format="PNG")
+    return bio.getvalue()
+
+# ────────────────────────────────
+# 📄 Visualizar reporte con paginado
+# ────────────────────────────────
+def mostrar_reporte_paginado(nombre_reporte, filas_por_pagina=20):
+    ruta = os.path.join(REPORTS_FOLDER, nombre_reporte)
+    if not os.path.exists(ruta):
+        sg.popup_error("❌ No se encontró el reporte.")
+        return
+
+    df = pd.read_csv(ruta)
+    total_filas = len(df)
+    total_paginas = (total_filas + filas_por_pagina - 1) // filas_por_pagina
+    pagina_actual = 0
+
+    def construir_tabla(pagina):
+        inicio = pagina * filas_por_pagina
+        fin = inicio + filas_por_pagina
+        datos = df.iloc[inicio:fin].values.tolist()
+        return datos
+
+    layout_tabla = [
+        [sg.Text(f"📄 Reporte: {nombre_reporte}", font=("Helvetica", 14))],
+        [sg.Table(values=construir_tabla(pagina_actual), headings=list(df.columns),
+                  key='-TABLA-', num_rows=filas_por_pagina,
+                  auto_size_columns=True, justification='left', enable_events=False)],
+        [
+            sg.Button("⏮️ Anterior"),
+            sg.Text(f"Página {pagina_actual+1} de {total_paginas}", key='-PAGINA-'),
+            sg.Button("⏭️ Siguiente"),
+            sg.Button("❌ Cerrar")
+        ]
+    ]
+
+    window_tabla = sg.Window(f"📄 Reporte: {nombre_reporte}", layout_tabla, modal=True)
+
+    while True:
+        event, _ = window_tabla.read()
+        if event in (sg.WINDOW_CLOSED, "❌ Cerrar"):
+            break
+        elif event == "⏭️ Siguiente" and pagina_actual < total_paginas - 1:
+            pagina_actual += 1
+        elif event == "⏮️ Anterior" and pagina_actual > 0:
+            pagina_actual -= 1
+
+        window_tabla["-TABLA-"].update(values=construir_tabla(pagina_actual))
+        window_tabla["-PAGINA-"].update(f"Página {pagina_actual+1} de {total_paginas}")
+
+    window_tabla.close()
+
+# ────────────────────────────────
+# 🧠 Interfaz Gráfica Principal
+# ────────────────────────────────
 sg.theme("DarkBlue3")
 
 layout = [
-    [sg.Text("🧠 Herramienta de Análisis de Datos", font=("Helvetica", 16))],
-    [sg.Button("📊 Analizar Notebook"), sg.Button("⚙️ Configuración"), sg.Button("🔍 Buscar Dataset Automáticamente")],
+    [sg.Text("🧠 Herramienta de Análisis de Datos", font=("Helvetica", 16), justification="center", expand_x=True)],
+    [
+        sg.Button(image_data=cargar_logo_redimensionado(), key="📊 Analizar Notebook", border_width=0, tooltip="Ejecutar análisis del notebook"),
+        sg.Text("Presionar logo para Correr Notebook", font=("Helvetica", 11))
+    ],
+    [sg.Button("⚙️ Configuración"), sg.Button("🔍 Buscar Dataset Automáticamente")],
     [sg.Text("Seleccionar carpeta:"), sg.Combo(values=CARPETAS_VISUALIZACION, default_value=CARPETAS_VISUALIZACION[0], key="-CARPETA-"), sg.Button("🔄 Refrescar Imágenes")],
     [sg.Text("Seleccionar imagen:"), sg.Combo(values=[], key="-IMAGEN-"), sg.Button("📷 Mostrar Imagen")],
+    [sg.Text("Seleccionar reporte (.csv):"), sg.Combo(values=cargar_nombres_reportes(), key="-REPORTE-"), sg.Button("📄 Ver Reporte"), sg.Button("🔁 Refrescar Reportes")],
     [sg.Image(key="-IMG-", size=(600, 600))],
     [sg.Button("❌ Salir")]
 ]
 
-window = sg.Window("Analizador de Datos Telco", layout, finalize=True)
+window = sg.Window("Analizador de Datos Telco", layout, finalize=True, location=(None, None), element_justification='center')
 
-# Inicializar la lista de imágenes
+# Inicializar lista de imágenes
 carpeta_actual = window["-CARPETA-"].get()
 window["-IMAGEN-"].update(values=cargar_nombres_imagenes(carpeta_actual))
 
-# Loop principal
+# ────────────────────────────────
+# 🌀 Loop principal de eventos
+# ────────────────────────────────
 while True:
     event, values = window.read()
     if event in (sg.WINDOW_CLOSED, "❌ Salir"):
@@ -144,9 +237,15 @@ while True:
     elif event == "🔄 Refrescar Imágenes":
         carpeta_actual = values["-CARPETA-"]
         window["-IMAGEN-"].update(values=cargar_nombres_imagenes(carpeta_actual))
+    elif event == "🔁 Refrescar Reportes":
+        window["-REPORTE-"].update(values=cargar_nombres_reportes())
     elif event == "⚙️ Configuración":
         abrir_panel_configuracion()
     elif event == "🔍 Buscar Dataset Automáticamente":
         descargar_dataset()
+    elif event == "📄 Ver Reporte":
+        nombre_reporte = values["-REPORTE-"]
+        if nombre_reporte:
+            mostrar_reporte_paginado(nombre_reporte)
 
 window.close()

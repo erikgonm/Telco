@@ -1,0 +1,5 @@
+{
+    "target_variable": "Churn",
+    "output_folder": "../Visuals/exploracion_inicial",
+    "data_path": "..\\Data\\telco_customer_churn.csv"
+}

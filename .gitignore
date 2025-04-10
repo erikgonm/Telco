@@ -49,6 +49,10 @@ Thumbs.db
 !Reports/*.csv
 !Visuals/*.png
 !Models/*.pkl
+!Assets/*.png
+!Code/*.py
+!Configuracion/*.json
+!Informes/*.pdf
 
 # ==========================================
 # Modelos y outputs
